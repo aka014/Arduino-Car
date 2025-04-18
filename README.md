@@ -51,8 +51,8 @@ This project involves the design and development of a miniature remote-controlle
 
 ## Project Objectives:
 
-    * To build a functional, IR-controlled remote car using Arduino, with integrated emergency braking and parking sensors for enhanced safety and usability.
+* To build a functional, IR-controlled remote car using Arduino, with integrated emergency braking and parking sensors for enhanced safety and usability.
 
-    * To design a reliable control system based on an IR remote, offering users an intuitive and efficient way to operate the car.
+* To design a reliable control system based on an IR remote, offering users an intuitive and efficient way to operate the car.
 
-    * To develop and implement smart features such as emergency braking and parking assistance, improving the car's safety and performance.
+* To develop and implement smart features such as emergency braking and parking assistance, improving the car's safety and performance.
