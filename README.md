@@ -1,5 +1,5 @@
 
-# Smart Arduino-based Remote-Controlled Car with Emergency Braking, Parking Sensors, and IR Control
+# Smart Arduino-based Remote-Controlled Car with Emergency Braking and IR Control
 
 ## Project Description:
 
