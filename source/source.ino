@@ -1,4 +1,5 @@
 #include <IRremote.hpp>
+#include <MsTimer2.h>
 
 // IR receiver pin
 const int RECV_PIN = 2;
@@ -9,11 +10,15 @@ const int IN2 = 4;
 // Spin right wheels backward
 const int IN3 = 5;
 // Spin right wheels forward
-const int IN4 = 6;
+const int IN4 = 7;
 // Start motor A (left wheels)
 const int ENA = 9;
 // Start motor B (right wheels)
 const int ENB = 10;
+
+const int LED_PIN = 6;
+
+
 
 const int REMOTE_NUM_2 = 0x18;
 
@@ -39,7 +44,7 @@ IRrecv irrecv(RECV_PIN);
 const int TICK = 137;
 
 void setup() {
-  
+  Serial.begin(9600);
   // Initialize pins
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
@@ -47,13 +52,20 @@ void setup() {
   pinMode(IN4, OUTPUT);
   pinMode(ENA, OUTPUT);
   pinMode(ENB, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
 
+  
   // Start L298N motor driver
   digitalWrite(ENA, HIGH);
   digitalWrite(ENB, HIGH);
 
+  digitalWrite(LED_PIN, HIGH);
+
   // Initialize and start the IR receiver
   irrecv.enableIRIn();
+
+  MsTimer2::set(1000, updateLight);
+  MsTimer2::start();
 }
 
 void loop() {
@@ -63,6 +75,8 @@ void loop() {
 
     // Get the value of the last successfully received signal
     int decoded = irrecv.decodedIRData.command;
+
+    Serial.println(decoded);
 
     if(decoded == REMOTE_NUM_2){
       forward();
@@ -78,6 +92,8 @@ void loop() {
       driftRight();
     }
 
+
+
     // Re-enable the IR receiver
     irrecv.resume();
   }else{
@@ -87,7 +103,10 @@ void loop() {
 }
 
 void stop(){
-
+  // digitalWrite(IN1, LOW);
+  // digitalWrite(IN2, LOW);
+  // digitalWrite(IN3, LOW);
+  // digitalWrite(IN4, LOW);
 
   analogWrite(ENA, 0);
   analogWrite(ENB, 0);
@@ -145,4 +164,28 @@ void right(){
   analogWrite(ENB, 96);
   analogWrite(ENA, 255);
   spinForward();
+}
+
+void updateLight(){
+  int val = analogRead(A0);
+  // Serial.println(val);
+  int brightness = (int) ((500 - val) * 0.6375);
+  brightness = brightness > 255 ? 255 : brightness;
+  // Serial.print("b: ");
+  // Serial.println(brightness);
+  if (val < 500) {
+    
+
+    // int brightness;
+    // if (val > 400) brightness = 240;
+    // else if (val > 300) brightness = 245;
+    // else if (val > 200) brightness = 250;
+    // else if (val > 100) brightness = 252;
+    // else brightness = 255;
+
+    digitalWrite(LED_PIN, HIGH);
+    analogWrite(LED_PIN, brightness);
+  }
+  else digitalWrite(LED_PIN, LOW);
+
 }
