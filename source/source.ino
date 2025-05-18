@@ -1,5 +1,4 @@
 #include <IRremote.hpp>
-#include <MsTimer2.h>
 
 // IR receiver pin
 const int RECV_PIN = 2;
@@ -33,7 +32,7 @@ const int REMOTE_NUM_8 = 0x52;
 const int REMOTE_NUM_9 = 0x4A;
 
 
-
+int lastTick = 0;
 
 
 
@@ -44,7 +43,7 @@ IRrecv irrecv(RECV_PIN);
 const int TICK = 137;
 
 void setup() {
-  Serial.begin(9600);
+  
   // Initialize pins
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
@@ -64,9 +63,10 @@ void setup() {
   // Initialize and start the IR receiver
   irrecv.enableIRIn();
 
-  MsTimer2::set(1000, updateLight);
-  MsTimer2::start();
+  //lastTick = millis();
 }
+
+
 
 void loop() {
 
@@ -75,8 +75,6 @@ void loop() {
 
     // Get the value of the last successfully received signal
     int decoded = irrecv.decodedIRData.command;
-
-    Serial.println(decoded);
 
     if(decoded == REMOTE_NUM_2){
       forward();
@@ -92,7 +90,18 @@ void loop() {
       driftRight();
     }
 
+    // if (millis() - lastTick >= 3000) {
+    //   int val = analogRead(A0);
 
+    //   if (val < 300) {
+    //     int brightness = (int) ((300 - val) * 1.275);
+    //     brightness = brightness > 255 ? 255 : brightness;
+    //     analogWrite(LED_PIN, brightness);
+    //   }
+    //   else analogWrite(LED_PIN, 0);
+
+    //   lastTick = millis();
+    // }
 
     // Re-enable the IR receiver
     irrecv.resume();
@@ -164,28 +173,4 @@ void right(){
   analogWrite(ENB, 96);
   analogWrite(ENA, 255);
   spinForward();
-}
-
-void updateLight(){
-  int val = analogRead(A0);
-  // Serial.println(val);
-  int brightness = (int) ((500 - val) * 0.6375);
-  brightness = brightness > 255 ? 255 : brightness;
-  // Serial.print("b: ");
-  // Serial.println(brightness);
-  if (val < 500) {
-    
-
-    // int brightness;
-    // if (val > 400) brightness = 240;
-    // else if (val > 300) brightness = 245;
-    // else if (val > 200) brightness = 250;
-    // else if (val > 100) brightness = 252;
-    // else brightness = 255;
-
-    digitalWrite(LED_PIN, HIGH);
-    analogWrite(LED_PIN, brightness);
-  }
-  else digitalWrite(LED_PIN, LOW);
-
 }
