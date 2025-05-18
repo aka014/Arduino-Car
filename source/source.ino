@@ -15,6 +15,23 @@ const int ENA = 9;
 // Start motor B (right wheels)
 const int ENB = 10;
 
+const int REMOTE_NUM_2 = 0x18;
+
+const int REMOTE_NUM_4 = 0x8;
+
+const int REMOTE_NUM_6 = 0x5A;
+
+const int REMOTE_NUM_7 = 0x42;
+
+const int REMOTE_NUM_8 = 0x52;
+
+const int REMOTE_NUM_9 = 0x4A;
+
+
+
+
+
+
 // Create an IR receiver object
 IRrecv irrecv(RECV_PIN);
 
@@ -47,14 +64,18 @@ void loop() {
     // Get the value of the last successfully received signal
     int decoded = irrecv.decodedIRData.command;
 
-    if(decoded == 0x18){
+    if(decoded == REMOTE_NUM_2){
       forward();
-    }else if(decoded == 0x8){
+    }else if(decoded == REMOTE_NUM_4){
       left();
-    }else if(decoded == 0x5A){
+    }else if(decoded == REMOTE_NUM_6){
       right();
-    }else if(decoded == 0x52){
+    }else if(decoded == REMOTE_NUM_8){
       backward();
+    }else if(decoded == REMOTE_NUM_7){
+      driftLeft();
+    }else if(decoded == REMOTE_NUM_9){
+      driftRight();
     }
 
     // Re-enable the IR receiver
@@ -66,13 +87,13 @@ void loop() {
 }
 
 void stop(){
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, LOW);
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, LOW);
+
+
+  analogWrite(ENA, 0);
+  analogWrite(ENB, 0);
 }
 
-void forward(){
+void spinForward(){
 
   // Spin all wheels forward
   digitalWrite(IN1, HIGH);
@@ -81,29 +102,47 @@ void forward(){
   digitalWrite(IN4, HIGH);
 }
 
-void left(){
+void driftLeft(){
 
-  // Spin right wheels forward
-  digitalWrite(IN1, LOW);
-  digitalWrite(IN2, LOW);
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, HIGH);
+  analogWrite(ENA, 0);
+  analogWrite(ENB, 255);
+  spinForward();
 }
 
-void right(){
+void driftRight(){
 
-  // Spin left wheels forward
-  digitalWrite(IN1, HIGH);
-  digitalWrite(IN2, LOW);
-  digitalWrite(IN3, LOW);
-  digitalWrite(IN4, LOW);
+  analogWrite(ENA, 255);
+  analogWrite(ENB, 0);
+  spinForward();
 }
 
 void backward(){
 
   // Spin all wheels backward
+  analogWrite(ENA, 255);
+  analogWrite(ENB, 255);
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, HIGH);
   digitalWrite(IN3, HIGH);
   digitalWrite(IN4, LOW);
+}
+
+void forward(){
+  analogWrite(ENA, 255);
+  analogWrite(ENB, 255);
+  spinForward();
+}
+
+void left(){
+
+  analogWrite(ENA, 127);
+  analogWrite(ENB, 255);
+  spinForward();
+}
+
+void right(){
+
+  analogWrite(ENB, 96);
+  analogWrite(ENA, 255);
+  spinForward();
 }
