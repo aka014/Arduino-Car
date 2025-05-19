@@ -2,6 +2,10 @@
 
 // IR receiver pin
 const int RECV_PIN = 2;
+// Light intensity sensitive LED pin
+// THIS PIN MIGHT NOT WORK FOR PWM RIGHT IF MILLIS() OR DELAY() IS USED!
+const int LED_PIN = 6;
+
 // Spin left wheels forward
 const int IN1 = 3;
 // Spin left wheels backward
@@ -15,35 +19,37 @@ const int ENA = 9;
 // Start motor B (right wheels)
 const int ENB = 10;
 
-const int LED_PIN = 6;
-
-
-
+// IR remote controller button 2
 const int REMOTE_NUM_2 = 0x18;
-
+// IR remote controller button 4
 const int REMOTE_NUM_4 = 0x8;
-
+// IR remote controller button 6
 const int REMOTE_NUM_6 = 0x5A;
-
+// IR remote controller button 7
 const int REMOTE_NUM_7 = 0x42;
-
+// IR remote controller button 8
 const int REMOTE_NUM_8 = 0x52;
-
+// IR remote controller button 9
 const int REMOTE_NUM_9 = 0x4A;
 
-
+// Used to measure time elapsed from the last LED brightness update
 int lastTick = 0;
 
-
+// Delay duration
+const int TICK = 50;
+// If photoresistor's voltage is below this threshold, LED turns on (Note: Voltage is read in units where a unit = 4.9 mV)
+const int BR_THRESHOLD = 300;
 
 // Create an IR receiver object
 IRrecv irrecv(RECV_PIN);
 
-// Delay duration
-const int TICK = 137;
+
 
 void setup() {
-  
+
+  //Testing
+  //Serial.begin(9600);
+
   // Initialize pins
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
@@ -58,11 +64,13 @@ void setup() {
   digitalWrite(ENA, HIGH);
   digitalWrite(ENB, HIGH);
 
+  // CHECK IF NECCESSARY
   digitalWrite(LED_PIN, HIGH);
 
   // Initialize and start the IR receiver
   irrecv.enableIRIn();
 
+  // Initial value of lastTick
   //lastTick = millis();
 }
 
@@ -75,6 +83,9 @@ void loop() {
 
     // Get the value of the last successfully received signal
     int decoded = irrecv.decodedIRData.command;
+
+    // Testing
+    //Serial.println(decoded, HEX);
 
     if(decoded == REMOTE_NUM_2){
       forward();
@@ -90,11 +101,12 @@ void loop() {
       driftRight();
     }
 
+    // Update LED brightness depending on the photoresistor's measured voltage
     // if (millis() - lastTick >= 3000) {
     //   int val = analogRead(A0);
 
-    //   if (val < 300) {
-    //     int brightness = (int) ((300 - val) * 1.275);
+    //   if (val < BR_THRESHOLD) {
+    //     int brightness = (int) ((BR_THRESHOLD - val) * 1.275);
     //     brightness = brightness > 255 ? 255 : brightness;
     //     analogWrite(LED_PIN, brightness);
     //   }
@@ -106,9 +118,11 @@ void loop() {
     // Re-enable the IR receiver
     irrecv.resume();
   }else{
-    stop();
+    delay(TICK);
+
+    // stop();
   }
-  delay(TICK);
+  //delay(TICK);
 }
 
 void stop(){
@@ -117,6 +131,7 @@ void stop(){
   // digitalWrite(IN3, LOW);
   // digitalWrite(IN4, LOW);
 
+  // Disable all motors
   analogWrite(ENA, 0);
   analogWrite(ENB, 0);
 }
@@ -132,6 +147,7 @@ void spinForward(){
 
 void driftLeft(){
 
+  // Enable only right wheels and spin forward
   analogWrite(ENA, 0);
   analogWrite(ENB, 255);
   spinForward();
@@ -139,6 +155,7 @@ void driftLeft(){
 
 void driftRight(){
 
+  // Enable only left wheels and spin forward
   analogWrite(ENA, 255);
   analogWrite(ENB, 0);
   spinForward();
@@ -146,9 +163,10 @@ void driftRight(){
 
 void backward(){
 
-  // Spin all wheels backward
+  // Enable all motors
   analogWrite(ENA, 255);
   analogWrite(ENB, 255);
+  // Spin all wheels backward
   digitalWrite(IN1, LOW);
   digitalWrite(IN2, HIGH);
   digitalWrite(IN3, HIGH);
@@ -156,6 +174,8 @@ void backward(){
 }
 
 void forward(){
+
+  // Enable all motors and spin forward
   analogWrite(ENA, 255);
   analogWrite(ENB, 255);
   spinForward();
@@ -163,6 +183,7 @@ void forward(){
 
 void left(){
 
+  //Fully enable right wheels and partially enable left wheels, then spin forward
   analogWrite(ENA, 127);
   analogWrite(ENB, 255);
   spinForward();
@@ -170,6 +191,7 @@ void left(){
 
 void right(){
 
+  //Fully enable left wheels and partially enable right wheels, then spin forward
   analogWrite(ENB, 96);
   analogWrite(ENA, 255);
   spinForward();
